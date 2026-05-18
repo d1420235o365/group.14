@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} — 書籍查詢系統{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+
+  <!-- 麵包屑 -->
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <a href="{{ url_for('main.index') }}">首頁</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="{{ url_for('main.book_list') }}">書籍搜尋</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">{{ book.title }}</span>
+  </nav>
+
+  <!-- ══ 書籍詳情卡片 ═══════════════════════════════ -->
+  <div class="detail-card">
+    <!-- 左側：封面 -->
+    <div class="detail-cover">
+      <div class="detail-cover-placeholder">
+        <span class="detail-cover-icon">📗</span>
+      </div>
+      <!-- 狀態徽章 -->
+      <div class="detail-status-wrap">
+        <span class="detail-status-badge
+          {% if book.status == '在庫' %}detail-status--available
+          {% elif book.status == '已借出' %}detail-status--borrowed
+          {% else %}detail-status--restocking{% endif %}">
+          {% if book.status == '在庫' %}✅
+          {% elif book.status == '已借出' %}🔖
+          {% else %}🔄{% endif %}
+          {{ book.status }}
+        </span>
+        <p class="detail-qty">庫存數量：<strong>{{ book.quantity }}</strong> 本</p>
+      </div>
+    </div>
+
+    <!-- 右側：資訊 -->
+    <div class="detail-info">
+      <h1 class="detail-title">{{ book.title }}</h1>
+      <p class="detail-author">✍️ {{ book.author }}</p>
+
+      <div class="detail-meta">
+        {% if book.isbn %}
+          <div class="meta-item">
+            <span class="meta-label">ISBN</span>
+            <span class="meta-value">{{ book.isbn }}</span>
+          </div>
+        {% endif %}
+        {% if book.category %}
+          <div class="meta-item">
+            <span class="meta-label">分類</span>
+            <span class="meta-value"><span class="book-category">{{ book.category }}</span></span>
+          </div>
+        {% endif %}
+        <div class="meta-item">
+          <span class="meta-label">建立日期</span>
+          <span class="meta-value">{{ book.created_at.strftime('%Y-%m-%d') }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">最後更新</span>
+          <span class="meta-value">{{ book.updated_at.strftime('%Y-%m-%d') }}</span>
+        </div>
+      </div>
+
+      {% if book.description %}
+        <div class="detail-desc">
+          <h2 class="detail-desc-title">📝 書籍簡介</h2>
+          <p class="detail-desc-text">{{ book.description }}</p>
+        </div>
+      {% endif %}
+
+      <!-- 操作按鈕 -->
+      <div class="detail-actions">
+        <a href="{{ url_for('main.book_list') }}" class="btn btn--secondary">← 返回搜尋</a>
+        <a href="{{ url_for('admin.edit_book', book_id=book.id) }}" class="btn btn--outline">✏️ 編輯此書</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}書籍搜尋結果 — 書籍查詢系統{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+
+  <!-- ══ 頁面標題 ════════════════════════════════════ -->
+  <div class="page-header">
+    <h1 class="page-title">📚 書籍搜尋</h1>
+    <p class="page-subtitle">共找到 <strong>{{ total }}</strong> 筆結果</p>
+  </div>
+
+  <!-- ══ 搜尋列 ════════════════════════════════════════ -->
+  <form id="search-form" class="search-bar-wrap" action="{{ url_for('main.book_list') }}" method="GET">
+    <div class="search-row">
+      <div class="search-input-group">
+        <span class="search-icon">🔍</span>
+        <input
+          id="search-input"
+          type="text"
+          name="q"
+          class="search-input"
+          placeholder="輸入書名、作者或 ISBN…"
+          value="{{ q }}"
+          autocomplete="off"
+          aria-label="搜尋關鍵字"
+        />
+        {% if q %}
+          <button type="button" class="search-clear" onclick="clearSearch()" title="清除">✕</button>
+        {% endif %}
+      </div>
+
+      <select id="filter-category" name="category" class="filter-select" aria-label="分類篩選">
+        <option value="">所有分類</option>
+        {% for cat in categories %}
+          <option value="{{ cat }}" {% if cat == category %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+        {% if category and category not in categories %}
+          <option value="{{ category }}" selected>{{ category }}</option>
+        {% endif %}
+      </select>
+
+      <select id="filter-status" name="status" class="filter-select" aria-label="狀態篩選">
+        <option value="">所有狀態</option>
+        <option value="在庫"   {% if status == '在庫' %}selected{% endif %}>在庫</option>
+        <option value="已借出" {% if status == '已借出' %}selected{% endif %}>已借出</option>
+        <option value="補貨中" {% if status == '補貨中' %}selected{% endif %}>補貨中</option>
+      </select>
+
+      <button id="search-btn" type="submit" class="btn btn--primary">搜尋</button>
+    </div>
+  </form>
+
+  <!-- 目前篩選條件標籤 -->
+  {% if q or category or status %}
+    <div class="active-filters">
+      <span class="filter-label">篩選中：</span>
+      {% if q %}
+        <span class="filter-tag">
+          關鍵字：{{ q }}
+          <a href="{{ url_for('main.book_list', category=category, status=status) }}" class="filter-tag-remove">✕</a>
+        </span>
+      {% endif %}
+      {% if category %}
+        <span class="filter-tag">
+          分類：{{ category }}
+          <a href="{{ url_for('main.book_list', q=q, status=status) }}" class="filter-tag-remove">✕</a>
+        </span>
+      {% endif %}
+      {% if status %}
+        <span class="filter-tag">
+          狀態：{{ status }}
+          <a href="{{ url_for('main.book_list', q=q, category=category) }}" class="filter-tag-remove">✕</a>
+        </span>
+      {% endif %}
+      <a href="{{ url_for('main.book_list') }}" class="filter-clear-all">清除全部</a>
+    </div>
+  {% endif %}
+
+  <!-- ══ 搜尋結果 ════════════════════════════════════ -->
+  {% if books %}
+    <div class="books-grid" id="books-grid">
+      {% for book in books %}
+        <a href="{{ url_for('main.book_detail', book_id=book.id) }}" class="book-card" id="book-card-{{ book.id }}">
+          <div class="book-card__cover">
+            <div class="book-cover-placeholder">
+              <span class="cover-icon">📗</span>
+            </div>
+            <span class="book-status-badge
+              {% if book.status == '在庫' %}book-status--available
+              {% elif book.status == '已借出' %}book-status--borrowed
+              {% else %}book-status--restocking{% endif %}">
+              {{ book.status }}
+            </span>
+          </div>
+          <div class="book-card__info">
+            <h2 class="book-title">
+              {% if q %}
+                {{ book.title | replace(q, '<mark>' ~ q ~ '</mark>') | safe }}
+              {% else %}
+                {{ book.title }}
+              {% endif %}
+            </h2>
+            <p class="book-author">
+              ✍️ {% if q %}
+                {{ book.author | replace(q, '<mark>' ~ q ~ '</mark>') | safe }}
+              {% else %}
+                {{ book.author }}
+              {% endif %}
+            </p>
+            {% if book.isbn %}
+              <p class="book-isbn">ISBN：{{ book.isbn }}</p>
+            {% endif %}
+            {% if book.category %}
+              <span class="book-category">{{ book.category }}</span>
+            {% endif %}
+            <div class="book-qty">庫存：{{ book.quantity }} 本</div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🔎</div>
+      <p class="empty-text">
+        {% if q or category or status %}
+          找不到符合「<strong>{{ q or category or status }}</strong>」的書籍
+        {% else %}
+          目前資料庫中沒有書籍
+        {% endif %}
+      </p>
+      <a href="{{ url_for('main.book_list') }}" class="btn btn--secondary">清除搜尋條件</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function clearSearch() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('q');
+  window.location.href = url.toString();
+}
+</script>
+{% endblock %}

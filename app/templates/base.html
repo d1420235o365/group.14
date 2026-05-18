@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="書籍查詢系統 — 快速搜尋書名、作者與庫存狀態" />
+  <title>{% block title %}書籍查詢系統{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- 全站樣式 -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- ══ 導覽列 ══════════════════════════════════════ -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="{{ url_for('main.index') }}" class="nav-brand">
+        <span class="brand-icon">📚</span>
+        <span class="brand-text">書籍查詢系統</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="{{ url_for('main.index') }}"
+               class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">
+          首頁
+        </a></li>
+        <li><a href="{{ url_for('main.book_list') }}"
+               class="nav-link {% if request.endpoint == 'main.book_list' %}active{% endif %}">
+          書籍搜尋
+        </a></li>
+        <li><a href="{{ url_for('admin.dashboard') }}"
+               class="nav-link nav-link--admin">
+          管理後台
+        </a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ══ Flash 訊息 ════════════════════════════════════ -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash--{{ category }}">
+            <span class="flash-icon">
+              {% if category == 'success' %}✅
+              {% elif category == 'danger' %}❌
+              {% elif category == 'warning' %}⚠️
+              {% else %}ℹ️{% endif %}
+            </span>
+            {{ message }}
+            <button class="flash-close" onclick="this.parentElement.remove()">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- ══ 主要內容 ══════════════════════════════════════ -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ══ 頁尾 ══════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer-container">
+      <p class="footer-text">© 2026 書籍查詢系統 — Group 14</p>
+      <p class="footer-sub">Powered by Flask + SQLite</p>
+    </div>
+  </footer>
+
+  <!-- 前端互動腳本 -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

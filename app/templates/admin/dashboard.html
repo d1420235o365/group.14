@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}管理後台 — 書籍查詢系統{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+
+  <div class="page-header admin-page-header">
+    <div>
+      <h1 class="page-title">⚙️ 管理後台</h1>
+      <p class="page-subtitle">書籍庫存管理中心</p>
+    </div>
+    <div class="admin-header-actions">
+      <a href="{{ url_for('admin.create_book') }}" id="btn-create" class="btn btn--primary">＋ 新增書籍</a>
+      <a href="{{ url_for('admin.logout') }}" class="btn btn--outline">登出</a>
+    </div>
+  </div>
+
+  <!-- 統計卡片 -->
+  <div class="stats-grid stats-grid--admin">
+    <div class="stat-card stat-card--blue">
+      <div class="stat-icon">📚</div>
+      <div class="stat-info">
+        <div class="stat-num">{{ total }}</div>
+        <div class="stat-label">書籍總數</div>
+      </div>
+    </div>
+    <div class="stat-card stat-card--green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-info">
+        <div class="stat-num">{{ available }}</div>
+        <div class="stat-label">在庫</div>
+      </div>
+    </div>
+    <div class="stat-card stat-card--orange">
+      <div class="stat-icon">🔖</div>
+      <div class="stat-info">
+        <div class="stat-num">{{ borrowed }}</div>
+        <div class="stat-label">已借出</div>
+      </div>
+    </div>
+    <div class="stat-card stat-card--red">
+      <div class="stat-icon">🔄</div>
+      <div class="stat-info">
+        <div class="stat-num">{{ restocking }}</div>
+        <div class="stat-label">補貨中</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 書籍列表表格 -->
+  <div class="table-card">
+    <div class="table-header">
+      <h2 class="table-title">書籍列表</h2>
+      <input id="admin-search" type="text" class="table-search" placeholder="快速篩選…" oninput="filterTable(this.value)" />
+    </div>
+
+    {% if books %}
+    <div class="table-wrap">
+      <table class="data-table" id="books-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>書名</th>
+            <th>作者</th>
+            <th>分類</th>
+            <th>狀態</th>
+            <th>庫存</th>
+            <th>建立時間</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for book in books %}
+          <tr class="table-row" id="row-{{ book.id }}">
+            <td class="td-id">{{ book.id }}</td>
+            <td class="td-title"><a href="{{ url_for('main.book_detail', book_id=book.id) }}">{{ book.title }}</a></td>
+            <td>{{ book.author }}</td>
+            <td>
+              {% if book.category %}<span class="book-category">{{ book.category }}</span>{% else %}—{% endif %}
+            </td>
+            <td>
+              <span class="badge
+                {% if book.status == '在庫' %}badge--green
+                {% elif book.status == '已借出' %}badge--orange
+                {% else %}badge--red{% endif %}">
+                {{ book.status }}
+              </span>
+            </td>
+            <td>{{ book.quantity }}</td>
+            <td>{{ book.created_at.strftime('%Y-%m-%d') }}</td>
+            <td class="td-actions">
+              <a href="{{ url_for('admin.edit_book', book_id=book.id) }}"
+                 id="edit-{{ book.id }}" class="btn btn--sm btn--outline">編輯</a>
+              <form method="POST" action="{{ url_for('admin.delete_book', book_id=book.id) }}"
+                    style="display:inline"
+                    onsubmit="return confirm('確定要刪除《{{ book.title }}》嗎？此操作無法復原！')">
+                <button id="delete-{{ book.id }}" type="submit" class="btn btn--sm btn--danger">刪除</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <p class="empty-text">尚無書籍資料，點擊「新增書籍」開始建立</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function filterTable(keyword) {
+  const rows = document.querySelectorAll('#books-table tbody .table-row');
+  const kw = keyword.toLowerCase();
+  rows.forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(kw) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

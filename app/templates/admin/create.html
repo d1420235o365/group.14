@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}新增書籍 — 管理後台{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+  <nav class="breadcrumb">
+    <a href="{{ url_for('admin.dashboard') }}">管理後台</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">新增書籍</span>
+  </nav>
+
+  <div class="form-card">
+    <div class="form-card-header">
+      <h1 class="page-title">＋ 新增書籍</h1>
+    </div>
+
+    <form id="create-form" method="POST" action="{{ url_for('admin.create_book') }}" class="book-form">
+      <div class="form-grid">
+        <div class="form-group form-group--full">
+          <label for="title" class="form-label">書名 <span class="required">*</span></label>
+          <input id="title" type="text" name="title" class="form-input"
+                 placeholder="請輸入書名" required />
+        </div>
+        <div class="form-group">
+          <label for="author" class="form-label">作者 <span class="required">*</span></label>
+          <input id="author" type="text" name="author" class="form-input"
+                 placeholder="請輸入作者姓名" required />
+        </div>
+        <div class="form-group">
+          <label for="isbn" class="form-label">ISBN</label>
+          <input id="isbn" type="text" name="isbn" class="form-input"
+                 placeholder="選填" />
+        </div>
+        <div class="form-group">
+          <label for="category" class="form-label">分類</label>
+          <select id="category" name="category" class="form-input">
+            <option value="">請選擇分類</option>
+            <option value="文學">文學</option>
+            <option value="科技">科技</option>
+            <option value="商業">商業</option>
+            <option value="歷史">歷史</option>
+            <option value="藝術">藝術</option>
+            <option value="自然科學">自然科學</option>
+            <option value="社會科學">社會科學</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="status" class="form-label">庫存狀態 <span class="required">*</span></label>
+          <select id="status" name="status" class="form-input" required>
+            <option value="在庫">在庫</option>
+            <option value="已借出">已借出</option>
+            <option value="補貨中">補貨中</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="quantity" class="form-label">庫存數量 <span class="required">*</span></label>
+          <input id="quantity" type="number" name="quantity" class="form-input"
+                 value="1" min="0" required />
+        </div>
+        <div class="form-group form-group--full">
+          <label for="description" class="form-label">書籍簡介</label>
+          <textarea id="description" name="description" class="form-textarea"
+                    placeholder="選填，簡短介紹這本書的內容…" rows="4"></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn--secondary">取消</a>
+        <button id="submit-create" type="submit" class="btn btn--primary">新增書籍</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

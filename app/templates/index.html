@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}書籍查詢系統 — 首頁{% endblock %}
+
+{% block content %}
+
+<!-- ══ Hero 區塊 ══════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <h1 class="hero-title">📚 書籍查詢系統</h1>
+    <p class="hero-subtitle">快速搜尋書名、作者、ISBN，掌握即時庫存狀態</p>
+
+    <!-- 主搜尋列 -->
+    <form id="hero-search-form" class="hero-search" action="{{ url_for('main.book_list') }}" method="GET">
+      <div class="hero-search-wrap">
+        <span class="search-icon-inner">🔍</span>
+        <input
+          id="hero-search-input"
+          type="text"
+          name="q"
+          class="hero-search-input"
+          placeholder="輸入書名、作者或 ISBN…"
+          autocomplete="off"
+          aria-label="搜尋書籍"
+        />
+        <button id="hero-search-btn" type="submit" class="hero-search-btn">搜尋</button>
+      </div>
+
+      <!-- 快速篩選 -->
+      <div class="hero-filters">
+        <select id="hero-category" name="category" class="filter-select">
+          <option value="">所有分類</option>
+          <option value="文學">文學</option>
+          <option value="科技">科技</option>
+          <option value="商業">商業</option>
+          <option value="歷史">歷史</option>
+          <option value="藝術">藝術</option>
+          <option value="自然科學">自然科學</option>
+          <option value="社會科學">社會科學</option>
+          <option value="其他">其他</option>
+        </select>
+        <select id="hero-status" name="status" class="filter-select">
+          <option value="">所有狀態</option>
+          <option value="在庫">在庫</option>
+          <option value="已借出">已借出</option>
+          <option value="補貨中">補貨中</option>
+        </select>
+      </div>
+    </form>
+
+    <!-- 快捷標籤 -->
+    <div class="hero-tags">
+      <span class="tag-label">熱門搜尋：</span>
+      <a href="{{ url_for('main.book_list') }}?q=Python" class="hero-tag">Python</a>
+      <a href="{{ url_for('main.book_list') }}?q=設計" class="hero-tag">設計</a>
+      <a href="{{ url_for('main.book_list') }}?category=科技" class="hero-tag">科技</a>
+      <a href="{{ url_for('main.book_list') }}?status=在庫" class="hero-tag">在庫書籍</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 統計卡片 ════════════════════════════════════════ -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card stat-card--blue">
+        <div class="stat-icon">📖</div>
+        <div class="stat-info">
+          <div class="stat-num">{{ latest_books | length }}</div>
+          <div class="stat-label">最新上架</div>
+        </div>
+      </div>
+      <div class="stat-card stat-card--green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <div class="stat-num">{{ latest_books | selectattr('status', 'equalto', '在庫') | list | length }}</div>
+          <div class="stat-label">可借閱</div>
+        </div>
+      </div>
+      <div class="stat-card stat-card--purple">
+        <div class="stat-icon">🔍</div>
+        <div class="stat-info">
+          <div class="stat-num">多條件</div>
+          <div class="stat-label">搜尋支援</div>
+        </div>
+      </div>
+      <div class="stat-card stat-card--orange">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-info">
+          <div class="stat-num">即時</div>
+          <div class="stat-label">庫存查詢</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 最新書籍 ════════════════════════════════════════ -->
+<section class="latest-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">最新上架書籍</h2>
+      <a href="{{ url_for('main.book_list') }}" class="section-more">查看全部 →</a>
+    </div>
+
+    {% if latest_books %}
+      <div class="books-grid">
+        {% for book in latest_books %}
+          <a href="{{ url_for('main.book_detail', book_id=book.id) }}" class="book-card" id="book-card-{{ book.id }}">
+            <div class="book-card__cover">
+              <div class="book-cover-placeholder">
+                <span class="cover-icon">📗</span>
+              </div>
+              <span class="book-status-badge book-status--{{ book.status | replace('已借出','borrowed') | replace('在庫','available') | replace('補貨中','restocking') }}">
+                {{ book.status }}
+              </span>
+            </div>
+            <div class="book-card__info">
+              <h3 class="book-title">{{ book.title }}</h3>
+              <p class="book-author">{{ book.author }}</p>
+              {% if book.category %}
+                <span class="book-category">{{ book.category }}</span>
+              {% endif %}
+              <div class="book-qty">庫存：{{ book.quantity }} 本</div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p class="empty-text">目前尚無書籍資料</p>
+        <a href="{{ url_for('admin.create_book') }}" class="btn btn--primary">新增第一本書</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}
